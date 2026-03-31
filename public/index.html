@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>视频会议</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ========== 入会页 ========== -->
+  <div id="lobby" class="lobby">
+    <div class="lobby-card">
+      <div class="logo">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+          <rect width="40" height="40" rx="12" fill="#6366f1"/>
+          <path d="M8 14a2 2 0 012-2h14a2 2 0 012 2v12a2 2 0 01-2 2H10a2 2 0 01-2-2V14z" fill="white" opacity="0.9"/>
+          <path d="M28 17l6-4v14l-6-4V17z" fill="white" opacity="0.9"/>
+        </svg>
+        <span>视频会议</span>
+      </div>
+
+      <div class="lobby-preview">
+        <video id="previewVideo" autoplay muted playsinline></video>
+        <div class="preview-overlay" id="previewOff">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M15.536 8.464a5 5 0 010 7.072M12 9a3 3 0 000 6M3 3l18 18"/>
+            <path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 01-4.24-4.24"/>
+          </svg>
+          <span>摄像头已关闭</span>
+        </div>
+      </div>
+
+      <div class="lobby-controls">
+        <button class="ctrl-btn" id="previewMicBtn" title="麦克风">
+          <svg class="icon-mic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/>
+            <path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/>
+          </svg>
+          <svg class="icon-mic-off hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="1" y1="1" x2="23" y2="23"/>
+            <path d="M9 9v3a3 3 0 005.12 2.12M15 9.34V4a3 3 0 00-5.94-.6M17 16.95A7 7 0 015 12v-2m14 0v2a7 7 0 01-.11 1.23M12 19v4M8 23h8"/>
+          </svg>
+        </button>
+        <button class="ctrl-btn" id="previewCamBtn" title="摄像头">
+          <svg class="icon-cam" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 10l4.553-2.277A1 1 0 0121 8.677v6.646a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/>
+          </svg>
+          <svg class="icon-cam-off hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 10l4.553-2.277A1 1 0 0121 8.677v6.646a1 1 0 01-1.447.894L15 14M3 3l18 18M9.5 9.5A2 2 0 005 11v5M3 8a2 2 0 012-2h1"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="form-group">
+        <input type="text" id="nameInput" placeholder="您的姓名" maxlength="20" />
+      </div>
+      <div class="form-group room-row">
+        <input type="text" id="roomInput" placeholder="会议室 ID（留空则新建）" />
+        <button id="joinBtn" class="btn-primary">加入会议</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 会议页 ========== -->
+  <div id="conference" class="conference hidden">
+
+    <!-- 左侧视频区 -->
+    <div class="video-area" id="videoArea">
+      <div id="videoGrid" class="video-grid"></div>
+
+      <!-- 底部工具栏 -->
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <span id="roomIdDisplay" class="room-id-badge"></span>
+          <button class="tool-btn" id="copyRoomBtn" title="复制会议链接">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2"/>
+              <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="toolbar-center">
+          <button class="tool-btn active" id="micBtn" title="麦克风">
+            <svg class="icon-mic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/>
+              <path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/>
+            </svg>
+            <svg class="icon-mic-off hidden" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="1" y1="1" x2="23" y2="23"/>
+              <path d="M9 9v3a3 3 0 005.12 2.12M15 9.34V4a3 3 0 00-5.94-.6M17 16.95A7 7 0 015 12v-2m14 0v2a7 7 0 01-.11 1.23M12 19v4M8 23h8"/>
+            </svg>
+            <span class="tool-label">静音</span>
+          </button>
+
+          <button class="tool-btn active" id="camBtn" title="摄像头">
+            <svg class="icon-cam" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M15 10l4.553-2.277A1 1 0 0121 8.677v6.646a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/>
+            </svg>
+            <svg class="icon-cam-off hidden" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M15 10l4.553-2.277A1 1 0 0121 8.677v6.646a1 1 0 01-1.447.894L15 14M3 3l18 18M9.5 9.5A2 2 0 005 11v5M3 8a2 2 0 012-2h1"/>
+            </svg>
+            <span class="tool-label">关闭视频</span>
+          </button>
+
+          <button class="tool-btn" id="screenBtn" title="共享屏幕">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="3" width="20" height="14" rx="2"/>
+              <path d="M8 21h8M12 17v4"/>
+            </svg>
+            <span class="tool-label">共享屏幕</span>
+          </button>
+
+          <button class="tool-btn" id="chatToggleBtn" title="聊天">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+            </svg>
+            <span class="chat-badge hidden" id="chatBadge">0</span>
+            <span class="tool-label">聊天</span>
+          </button>
+
+          <button class="tool-btn danger" id="leaveBtn" title="离开会议">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/>
+            </svg>
+            <span class="tool-label">离开</span>
+          </button>
+        </div>
+
+        <div class="toolbar-right">
+          <span id="peerCount" class="peer-count">1人</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右侧聊天栏 -->
+    <div class="chat-panel hidden" id="chatPanel">
+      <div class="chat-header">
+        <span>会议聊天</span>
+        <button id="chatCloseBtn" class="icon-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="chat-messages" id="chatMessages"></div>
+      <div class="chat-input-row">
+        <input type="text" id="chatInput" placeholder="发送消息..." maxlength="300" />
+        <button id="sendBtn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
