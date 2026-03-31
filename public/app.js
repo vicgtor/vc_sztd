@@ -36,12 +36,23 @@ let previewCamOn = true;
 let previewStream = null;
 
 async function startPreview() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    $('previewOff').innerHTML = `
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <span style="color:#f87171;text-align:center;padding:0 12px">需要 HTTPS 才能访问摄像头<br>请确认地址以 https:// 开头</span>`;
+    return;
+  }
   try {
     previewStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
     $('previewVideo').srcObject = previewStream;
     $('previewOff').classList.add('hidden');
   } catch (e) {
-    console.warn('Preview not available:', e);
+    console.warn('Preview not available:', e.name, e.message);
+    if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
+      $('previewOff').innerHTML = `
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+        <span style="color:#f87171;text-align:center;padding:0 12px">摄像头权限被拒绝<br>请点击地址栏左侧允许摄像头和麦克风</span>`;
+    }
   }
 }
 
