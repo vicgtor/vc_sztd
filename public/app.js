@@ -154,6 +154,7 @@ function addVideoTile(id, name, stream, isLocal = false) {
 
   if (stream) {
     video.srcObject = stream;
+    video.play().catch(() => {});
   }
 
   // Avatar overlay (shown when camera off)
@@ -301,8 +302,10 @@ function createPeerConnection(peerId) {
   };
 
   // Remote stream
-  pc.ontrack = ({ streams }) => {
+  pc.ontrack = ({ track, streams }) => {
     const stream = streams[0];
+    if (!stream) return;
+
     const info = state.peerInfo.get(peerId);
     const name = info ? info.name : 'Unknown';
 
@@ -311,14 +314,18 @@ function createPeerConnection(peerId) {
       addVideoTile(peerId, name, stream);
     } else {
       const video = tile.querySelector('video');
-      if (video) video.srcObject = stream;
+      if (video) {
+        video.srcObject = stream;
+        video.play().catch(() => {});
+      }
     }
     updateGrid();
 
-    // Update avatar visibility each time a track arrives
-    const hasVideo = stream.getVideoTracks().some(t => t.readyState === 'live');
-    const videoOn = info ? info.videoOn : true;
-    updateTileAvatar(peerId, videoOn && hasVideo);
+    // When video track arrives, show video; ignore audio-only events
+    if (track.kind === 'video') {
+      const videoOn = info ? info.videoOn : true;
+      updateTileAvatar(peerId, videoOn);
+    }
 
     // Watch for track mute/unmute
     stream.onaddtrack = stream.onremovetrack = () => {
