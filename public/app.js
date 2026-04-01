@@ -315,6 +315,11 @@ function createPeerConnection(peerId) {
     }
     updateGrid();
 
+    // Update avatar visibility each time a track arrives
+    const hasVideo = stream.getVideoTracks().some(t => t.readyState === 'live');
+    const videoOn = info ? info.videoOn : true;
+    updateTileAvatar(peerId, videoOn && hasVideo);
+
     // Watch for track mute/unmute
     stream.onaddtrack = stream.onremovetrack = () => {
       const videoActive = stream.getVideoTracks().some(t => !t.muted);
